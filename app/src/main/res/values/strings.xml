@@ -6,11 +6,14 @@
     <string name="password">Password</string>
     <string name="password_hint">Enter password</string>
     <string name="button_login">Login</string>
-    <string name="button_registration"><u>Are You a new user? Tap here</u></string>
+    <string name="text_registration"><u>Are You a new user? Tap here</u></string>
+    <string name="button_registration">Registration</string>
 
     <!-- For registration screen -->
     <string name="user_name">Name</string>
     <string name="name_hint">Your name</string>
     <string name="user_last_name">Last name</string>
     <string name="last_name_hint">Your last name</string>
+    <string name="log_in"><u>Log in</u></string>
+    <string name="confirm_password">Confirm password</string>
 </resources>

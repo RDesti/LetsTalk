@@ -5,4 +5,5 @@ enum class EValidationType {
     LAST_NAME,
     EMAIL,
     PASSWORD,
+    CONFIRM_PASSWORD
 }
