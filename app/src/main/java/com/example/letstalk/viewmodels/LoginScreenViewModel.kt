@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.letstalk.entity.RequestResultData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
-import com.example.letstalk.usecases.LoginUseCase
+import com.example.letstalk.usecases.ILoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,15 +16,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: ILoginUseCase
 ) : ViewModel() {
 
     var email = MutableLiveData<String>()
     var password = MutableLiveData<String>()
-
-    private val _isShowPassword = MutableLiveData<Boolean>()
-    val isShowPassword: LiveData<Boolean>
-        get() = _isShowPassword
+    var emailError = MutableLiveData<String>()
+    var passwordError = MutableLiveData<String>()
 
     private val _isValidEmail = MutableLiveData<Boolean>().apply { value = true }
     val isValidEmail: LiveData<Boolean>
@@ -57,10 +55,12 @@ class LoginScreenViewModel @Inject constructor(
     fun validate(type: EValidationType, value: String?) {
         when (type) {
             EValidationType.EMAIL -> {
-                _isValidEmail.value = value.isNullOrEmpty()
+                emailError.value = if (value.isNullOrEmpty()) "Requires field" else null
+                _isValidEmail.value = !value.isNullOrEmpty()
             }
             EValidationType.PASSWORD -> {
-                _isValidPassword.value = value.isNullOrEmpty()
+                passwordError.value = if (value.isNullOrEmpty()) "Requires field" else null
+                _isValidPassword.value = !value.isNullOrEmpty()
             }
             else -> {}
         }

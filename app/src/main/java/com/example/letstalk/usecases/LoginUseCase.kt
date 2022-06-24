@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
-class LoginUseCase @Inject constructor() {
-    suspend fun execute(email: String, password: String): Flow<RequestResultData> {
+class LoginUseCase @Inject constructor() : ILoginUseCase {
+    override suspend fun execute(email: String, password: String): Flow<RequestResultData> {
         return flowOf(RequestResultData(EResultLoginType.SUCCESS))
     //TODO
     //login(email, password)

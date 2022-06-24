@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.letstalk.entity.RequestResultData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
-import com.example.letstalk.usecases.LoginUseCase
-import com.example.letstalk.usecases.RegistrationUseCase
+import com.example.letstalk.usecases.ILoginUseCase
+import com.example.letstalk.usecases.IRegistrationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -18,9 +18,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegistrationScreenViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase,
-    private val regUseCase: RegistrationUseCase
+    private val loginUseCase: ILoginUseCase,
+    private val regUseCase: IRegistrationUseCase
 ) : ViewModel() {
+    var nameError = MutableLiveData<String>()
+    var lastNameError = MutableLiveData<String>()
+    var emailError = MutableLiveData<String>()
+    var passwordError = MutableLiveData<String>()
+    var confirmPasswordError = MutableLiveData<String>()
+
     var password: String = ""
 
     private val _isValidName = MutableLiveData<Boolean>().apply { value = true }
@@ -51,13 +57,13 @@ class RegistrationScreenViewModel @Inject constructor(
     val isLoginSuccess: LiveData<RequestResultData>
         get() = _isLoginSuccess
 
-    fun registration(name: String, lastName: String, email: String, password: String) {
+    fun registration(name: String, lastName: String, email: String, password: String, confirmPassword: String) {
         val userData = regUseCase.getUserData()
         userData.name = name
         userData.secondName = lastName
         userData.email = email
         userData.password = password
-        userData.confirmPassword = password
+        userData.confirmPassword = confirmPassword
 
         viewModelScope.launch {
             regUseCase.register(userData)
@@ -67,12 +73,6 @@ class RegistrationScreenViewModel @Inject constructor(
                 .collect {
                     withContext(Dispatchers.Main) {
                         _isRegistrationSuccess.value = it
-
-//                        if (it.resultType == EResultLoginType.SUCCESS) {
-//                            _isRegistrationSuccess.value = EResultType.SUCCESS
-//                        } else {
-//                            _isRegistrationSuccess.value = EResultType.ERROR
-//                        }
                     }
                 }
         }
@@ -99,21 +99,32 @@ class RegistrationScreenViewModel @Inject constructor(
     fun validate(type: EValidationType, value: String?) {
         when (type) {
             EValidationType.NAME -> {
-                _isValidName.value = value.isNullOrEmpty()
+                nameError.value =  if (value.isNullOrEmpty()) "Requires field" else null
+                _isValidName.value = !value.isNullOrEmpty()
             }
             EValidationType.LAST_NAME -> {
-                _isValidLastName.value = value.isNullOrEmpty()
+                lastNameError.value =  if (value.isNullOrEmpty()) "Requires field" else null
+                _isValidLastName.value = !value.isNullOrEmpty()
             }
             EValidationType.EMAIL -> {
-                _isValidEmail.value = value.isNullOrEmpty()
+                emailError.value =  if (value.isNullOrEmpty()) "Requires field" else null
+                _isValidEmail.value = !value.isNullOrEmpty()
             }
             EValidationType.PASSWORD -> {
-                _isValidPassword.value = value.isNullOrEmpty()
+                passwordError.value =  if (value.isNullOrEmpty()) "Requires field" else {
+                    password = value
+                    null
+                }
+                _isValidPassword.value = !value.isNullOrEmpty()
             }
             EValidationType.CONFIRM_PASSWORD -> {
-                _isValidConfirmPassword.value = value.isNullOrEmpty() && value == password
+                confirmPasswordError.value =  when {
+                    value.isNullOrEmpty() -> "Requires field"
+                    value != password -> "Passwords do not match"
+                    else -> null
+                }
+                _isValidConfirmPassword.value = confirmPasswordError.value.isNullOrEmpty()
             }
-            else->{}
         }
     }
 }
