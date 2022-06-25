@@ -21,6 +21,8 @@ import com.example.letstalk.databinding.FragmentRegistrationBinding
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
 import com.example.letstalk.viewmodels.RegistrationScreenViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,6 +32,8 @@ class RegistrationFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val _viewModel by lazy { ViewModelProvider(this)[RegistrationScreenViewModel::class.java] }
+
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +47,7 @@ class RegistrationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        auth = FirebaseAuth.getInstance()
         initListeners()
         initObserves()
         validateText()
@@ -88,13 +93,34 @@ class RegistrationFragment : Fragment() {
             && _viewModel.isValidEmail.value == true
             && _viewModel.isValidPassword.value == true
             && _viewModel.isValidConfirmPassword.value == true) {
-            _viewModel.registration(
-                binding.nameEditText.text.toString(),
-                binding.lastNameEditText.text.toString(),
-                binding.emailEditText.text.toString(),
-                binding.passwordEditText.text.toString(),
-                binding.confirmPasswordEditText.text.toString()
-            )
+            val email = binding.emailEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { it ->
+                    if (it.isSuccessful) {
+                        _viewModel.saveUserData(
+                            binding.nameEditText.text.toString(),
+                            binding.lastNameEditText.text.toString(),
+                            binding.emailEditText.text.toString(),
+                            binding.passwordEditText.text.toString()
+                        )
+                        _viewModel.isRegisterSuccses(true)
+
+                        /*auth.currentUser?.uid?.let { it1 ->
+                            FirebaseDatabase.getInstance().getReference("Users")
+                                .child(it1)
+                                .setValue(_viewModel.getUserData().name)
+                                .addOnCompleteListener { 
+                                    if (it.isSuccessful) {
+                                    } else {
+                                    }
+                                }
+                        }*/
+                    } else {
+                        //todo error message
+                        _viewModel.isRegisterSuccses(false)
+                    }
+                }
         } else {
             setValidationColor(
                 _viewModel.nameError.value,

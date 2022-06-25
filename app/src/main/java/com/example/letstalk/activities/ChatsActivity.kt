@@ -2,6 +2,7 @@ package com.example.letstalk.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
 import com.example.letstalk.R
 import com.example.letstalk.databinding.ActivityChatsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -12,6 +13,18 @@ class ChatsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_chats)
+        _binding = ActivityChatsBinding.inflate(layoutInflater)
+        setContentView(_binding.root)
+        initListeners()
     }
+
+    private fun initListeners() {
+        _binding.mainToolbar.setOnMenuItemClickListener { item ->
+            when(item?.itemId) {
+                R.id.settings_menu_exit -> {} //todo exit to login screen
+            }
+            true
+        }
+    }
+
 }

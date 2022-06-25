@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.letstalk.entity.RequestResultData
+import com.example.letstalk.entity.UserData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
 import com.example.letstalk.usecases.ILoginUseCase
@@ -57,25 +58,23 @@ class RegistrationScreenViewModel @Inject constructor(
     val isLoginSuccess: LiveData<RequestResultData>
         get() = _isLoginSuccess
 
-    fun registration(name: String, lastName: String, email: String, password: String, confirmPassword: String) {
+    fun saveUserData(name: String, lastName: String, email: String, password: String) {
         val userData = regUseCase.getUserData()
         userData.name = name
         userData.secondName = lastName
         userData.email = email
         userData.password = password
-        userData.confirmPassword = confirmPassword
+    }
 
-        viewModelScope.launch {
-            regUseCase.register(userData)
-                .catch {
-                    _isRegistrationSuccess.value = RequestResultData(EResultLoginType.ERROR)
-                }
-                .collect {
-                    withContext(Dispatchers.Main) {
-                        _isRegistrationSuccess.value = it
-                    }
-                }
-        }
+    fun getUserData() : UserData {
+        return regUseCase.getUserData()
+    }
+
+    fun isRegisterSuccses(isSuccessful: Boolean) {
+        if (isSuccessful)
+            _isRegistrationSuccess.value = RequestResultData(EResultLoginType.SUCCESS)
+        else
+            _isRegistrationSuccess.value = RequestResultData(EResultLoginType.ERROR)
     }
 
     fun login() {

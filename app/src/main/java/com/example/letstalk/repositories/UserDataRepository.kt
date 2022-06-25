@@ -12,7 +12,6 @@ class UserDataRepository @Inject constructor() : IUserDataRepository{
         userData.email = null
         userData.name = null
         userData.secondName = null
-        userData.confirmPassword = null
         userData.password = null
     }
 }
