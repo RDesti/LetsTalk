@@ -7,6 +7,7 @@ import android.view.Menu
 import com.example.letstalk.R
 import com.example.letstalk.databinding.ActivityChatsBinding
 import com.example.letstalk.entity.User
+import com.example.letstalk.enum.EAppStates
 import com.example.letstalk.fragments.ChatFragment
 import com.example.letstalk.utilits.*
 import com.google.firebase.database.DataSnapshot
@@ -24,6 +25,16 @@ class ChatsActivity : AppCompatActivity() {
         setContentView(_binding.root)
         initListeners()
         initUser()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EAppStates.updateState(EAppStates.ONLINE)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EAppStates.updateState(EAppStates.OFFLINE)
     }
 
     private fun initUser() {
