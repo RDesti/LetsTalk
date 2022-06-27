@@ -10,6 +10,7 @@ import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
 import com.example.letstalk.usecases.ILoginUseCase
 import com.example.letstalk.usecases.IRegistrationUseCase
+import com.example.letstalk.utilits.AUTH
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -79,19 +80,16 @@ class RegistrationScreenViewModel @Inject constructor(
 
     fun login() {
         if (regUseCase.getUserData().email.isNullOrEmpty() || regUseCase.getUserData().password.isNullOrEmpty()) return
-        viewModelScope.launch {
-            loginUseCase.execute(
-                regUseCase.getUserData().email!!,
-                regUseCase.getUserData().password!!
-            )
-                .collect {
-                    withContext(Dispatchers.Main) {
-                        if (it.resultType == EResultLoginType.SUCCESS) {
-                            regUseCase.clearUserData()
-                        }
-                        _isLoginSuccess.value = it
-                    }
-                }
+        AUTH.signInWithEmailAndPassword(
+            regUseCase.getUserData().email!!,
+            regUseCase.getUserData().password!!
+        ).addOnCompleteListener {
+            if (it.isSuccessful) {
+                regUseCase.clearUserData()
+                _isLoginSuccess.value = RequestResultData(EResultLoginType.SUCCESS)
+            } else {
+                _isLoginSuccess.value = RequestResultData(EResultLoginType.ERROR)
+            }
         }
     }
 

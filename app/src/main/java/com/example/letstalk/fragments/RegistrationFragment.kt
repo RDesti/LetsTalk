@@ -20,6 +20,7 @@ import com.example.letstalk.activities.ChatsActivity
 import com.example.letstalk.databinding.FragmentRegistrationBinding
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
+import com.example.letstalk.utilits.*
 import com.example.letstalk.viewmodels.RegistrationScreenViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -33,8 +34,6 @@ class RegistrationFragment : Fragment() {
 
     private val _viewModel by lazy { ViewModelProvider(this)[RegistrationScreenViewModel::class.java] }
 
-    private lateinit var auth: FirebaseAuth
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,7 +46,6 @@ class RegistrationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        auth = FirebaseAuth.getInstance()
         initListeners()
         initObserves()
         validateText()
@@ -77,6 +75,7 @@ class RegistrationFragment : Fragment() {
         }
 
         binding.registrationButton.setOnClickListener {
+            hideKeyboard(requireActivity())
             registration()
         }
     }
@@ -95,7 +94,7 @@ class RegistrationFragment : Fragment() {
             && _viewModel.isValidConfirmPassword.value == true) {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
-            auth.createUserWithEmailAndPassword(email, password)
+            AUTH.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { it ->
                     if (it.isSuccessful) {
                         _viewModel.saveUserData(
@@ -104,21 +103,28 @@ class RegistrationFragment : Fragment() {
                             binding.emailEditText.text.toString(),
                             binding.passwordEditText.text.toString()
                         )
-                        _viewModel.isRegisterSuccses(true)
 
-                        /*auth.currentUser?.uid?.let { it1 ->
-                            FirebaseDatabase.getInstance().getReference("Users")
-                                .child(it1)
-                                .setValue(_viewModel.getUserData().name)
-                                .addOnCompleteListener { 
-                                    if (it.isSuccessful) {
-                                    } else {
-                                    }
+                        val uid = AUTH.currentUser?.uid.toString()
+                        val userData = _viewModel.getUserData()
+                        val dateMap = mutableMapOf<String, Any?>(
+                            CHILD_ID to uid,
+                            CHILD_EMAIL to userData.email,
+                            CHILD_USER_NAME to userData.name,
+                            CHILD_USER_LASTNAME to userData.secondName
+                        )
+
+                        REF_DATABASE_ROOT.child(NODE_USERS)
+                            .child(uid)
+                            .updateChildren(dateMap)
+                            .addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    _viewModel.isRegisterSuccses(true)
+                                } else {
+                                    _viewModel.isRegisterSuccses(false)
                                 }
-                        }*/
+                            }
                     } else {
                         //todo error message
-                        _viewModel.isRegisterSuccses(false)
                     }
                 }
         } else {

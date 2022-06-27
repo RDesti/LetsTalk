@@ -8,6 +8,7 @@ import com.example.letstalk.entity.RequestResultData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
 import com.example.letstalk.usecases.ILoginUseCase
+import com.example.letstalk.utilits.AUTH
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,13 +43,14 @@ class LoginScreenViewModel @Inject constructor(
         if (email.value.isNullOrEmpty() || password.value.isNullOrEmpty())
             return
         _isLoginSuccess.value = RequestResultData(EResultLoginType.LOADING)
-        viewModelScope.launch {
-            loginUseCase.execute(email.value.toString(), password.value.toString())
-                .collect {
-                    withContext(Dispatchers.Main) {
-                        _isLoginSuccess.value = it
-                    }
-                }
+        AUTH.signInWithEmailAndPassword(
+            email.value.toString(),
+            password.value.toString()
+        ).addOnCompleteListener {
+            if (it.isSuccessful) {
+                _isLoginSuccess.value = RequestResultData(EResultLoginType.SUCCESS)
+            } else
+                _isLoginSuccess.value = RequestResultData(EResultLoginType.ERROR)
         }
     }
 

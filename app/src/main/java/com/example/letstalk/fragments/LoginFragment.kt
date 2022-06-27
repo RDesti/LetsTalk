@@ -20,6 +20,7 @@ import com.example.letstalk.activities.ChatsActivity
 import com.example.letstalk.databinding.FragmentLoginBinding
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
+import com.example.letstalk.utilits.hideKeyboard
 import com.example.letstalk.viewmodels.LoginScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -66,6 +67,7 @@ class LoginFragment : Fragment() {
                 binding.passwordEditText
             )
             if (_viewModel.isValidEmail.value == true && _viewModel.isValidPassword.value == true) {
+                hideKeyboard(requireActivity())
                 _viewModel.login()
             }
         }
