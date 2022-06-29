@@ -7,6 +7,7 @@ import com.example.letstalk.entity.RequestResultData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
 import com.example.letstalk.utilits.AUTH
+import com.example.letstalk.utilits.UID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -41,6 +42,7 @@ class LoginScreenViewModel @Inject constructor() : ViewModel() {
             password.value.toString()
         ).addOnCompleteListener {
             if (it.isSuccessful) {
+                UID = AUTH.currentUser?.uid.toString()
                 _isLoginSuccess.value = RequestResultData(EResultLoginType.SUCCESS)
             } else
                 _isLoginSuccess.value = RequestResultData(EResultLoginType.ERROR)

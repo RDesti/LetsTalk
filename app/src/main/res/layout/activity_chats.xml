@@ -20,6 +20,7 @@
         <include layout="@layout/toolbar_info"
             android:id="@+id/toolbar_info"
             android:visibility="gone"/>
+
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.fragment.app.FragmentContainerView

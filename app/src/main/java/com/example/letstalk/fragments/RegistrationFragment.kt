@@ -38,7 +38,8 @@ class RegistrationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_registration, container, false)
+        _binding =
+            DataBindingUtil.inflate(inflater, R.layout.fragment_registration, container, false)
         binding.lifecycleOwner = this
         binding.viewModel = _viewModel
         return binding.root
@@ -85,13 +86,17 @@ class RegistrationFragment : Fragment() {
         _viewModel.validate(EValidationType.LAST_NAME, binding.lastNameEditText.text.toString())
         _viewModel.validate(EValidationType.EMAIL, binding.emailEditText.text.toString())
         _viewModel.validate(EValidationType.PASSWORD, binding.passwordEditText.text.toString())
-        _viewModel.validate(EValidationType.CONFIRM_PASSWORD, binding.confirmPasswordEditText.text.toString())
+        _viewModel.validate(
+            EValidationType.CONFIRM_PASSWORD,
+            binding.confirmPasswordEditText.text.toString()
+        )
 
         if (_viewModel.isValidName.value == true
             && _viewModel.isValidLastName.value == true
             && _viewModel.isValidEmail.value == true
             && _viewModel.isValidPassword.value == true
-            && _viewModel.isValidConfirmPassword.value == true) {
+            && _viewModel.isValidConfirmPassword.value == true
+        ) {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
             AUTH.createUserWithEmailAndPassword(email, password)
@@ -104,10 +109,10 @@ class RegistrationFragment : Fragment() {
                             binding.passwordEditText.text.toString()
                         )
 
-                        val uid = AUTH.currentUser?.uid.toString()
+                        UID = AUTH.currentUser?.uid.toString()
                         val userData = _viewModel.getUserData()
                         val dateMap = mutableMapOf<String, Any?>(
-                            CHILD_ID to uid,
+                            CHILD_ID to UID,
                             CHILD_EMAIL to userData.email,
                             CHILD_USER_NAME to userData.name,
                             CHILD_USER_LASTNAME to userData.secondName
@@ -115,10 +120,10 @@ class RegistrationFragment : Fragment() {
 
                         userData.email?.let { email ->
                             REF_DATABASE_ROOT.child(NODE_EMAILS)
-                                .child(email.replace('.', '_')).setValue(uid)
+                                .child(email.replace('.', '_')).setValue(UID)
                                 .addOnSuccessListener {
                                     REF_DATABASE_ROOT.child(NODE_USERS)
-                                        .child(uid)
+                                        .child(UID)
                                         .updateChildren(dateMap)
                                         .addOnCompleteListener {
                                             if (it.isSuccessful) {

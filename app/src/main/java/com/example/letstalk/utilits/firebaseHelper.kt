@@ -20,7 +20,7 @@ const val CHILD_ID = "id"
 const val CHILD_EMAIL = "email"
 const val CHILD_USER_NAME = "username"
 const val CHILD_USER_LASTNAME = "userlastname"
-const val CHILD_STATE = "state"
+const val CHILD_STATUS = "status"
 
 fun initFirebase() {
     AUTH = FirebaseAuth.getInstance()
@@ -31,27 +31,28 @@ fun initFirebase() {
 }
 
 fun searchUser(email: String) {
-    REF_DATABASE_ROOT.child(NODE_EMAILS)
-        .addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                snapshot.children.forEach {
-                    if (snapshot.key == email) {
-                        REF_DATABASE_ROOT.child(NODE_EMAILS_CONTACTS)
-                            .child(UID)
-                            .child(snapshot.value.toString())
-                            .child(CHILD_ID)
-                            .setValue(snapshot.value.toString())
-                            .addOnFailureListener {
-                                //todo error
-                            }
+    if (AUTH.currentUser != null)
+        REF_DATABASE_ROOT.child(NODE_EMAILS)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    snapshot.children.forEach {
+                        if (it.key == email.replace('.', '_')) {
+                            REF_DATABASE_ROOT.child(NODE_EMAILS_CONTACTS)
+                                .child(UID)
+                                .child(it.value.toString())
+                                .child(CHILD_ID)
+                                .setValue(it.value.toString())
+                                .addOnFailureListener {
+                                    //todo error
+                                }
+                        }
                     }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
+                override fun onCancelled(error: DatabaseError) {
 
-            }
-        })
+                }
+            })
 }
 
 fun DataSnapshot.getUserModel(): User =

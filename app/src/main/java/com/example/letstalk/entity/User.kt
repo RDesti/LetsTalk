@@ -2,8 +2,8 @@ package com.example.letstalk.entity
 
 data class User(
     val id: String = "",
-    val name: String = "",
-    val lastname: String = "",
+    val username: String = "",
+    val userlastname: String = "",
     val email: String = "",
     var status: String = ""
 )

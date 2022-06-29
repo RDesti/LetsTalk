@@ -3,11 +3,13 @@ package com.example.letstalk.activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.letstalk.R
 import com.example.letstalk.databinding.ActivityChatsBinding
 import com.example.letstalk.entity.User
 import com.example.letstalk.enum.EAppStatus
-import com.example.letstalk.fragments.ChatFragment
+import com.example.letstalk.fragments.SingleChatFragment
 import com.example.letstalk.utilits.*
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -17,11 +19,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ChatsActivity : AppCompatActivity() {
     private lateinit var _binding: ActivityChatsBinding
+    lateinit var chatsToolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityChatsBinding.inflate(layoutInflater)
         setContentView(_binding.root)
+        AppConstants.CHATS_ACTIVITY = this
+        chatsToolbar = _binding.mainToolbar
         initListeners()
         initUser()
     }
@@ -54,8 +59,9 @@ class ChatsActivity : AppCompatActivity() {
             this.supportFragmentManager.popBackStack()
         }
         _binding.mainToolbar.setOnMenuItemClickListener { item ->
-            when(item?.itemId) {
+            when (item?.itemId) {
                 R.id.settings_menu_exit -> {
+                    EAppStatus.updateState(EAppStatus.OFFLINE)
                     AUTH.signOut()
                     goToLogin()
                 }
@@ -76,7 +82,7 @@ class ChatsActivity : AppCompatActivity() {
     }
 
     private fun changeToolbar() {
-        if (supportFragmentManager.fragments == ChatFragment::class.java) {
+        if (supportFragmentManager.fragments == SingleChatFragment::class.java) {
             this.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         } else {
             this.supportActionBar?.setDisplayHomeAsUpEnabled(false)

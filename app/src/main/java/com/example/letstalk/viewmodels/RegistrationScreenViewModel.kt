@@ -9,6 +9,7 @@ import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
 import com.example.letstalk.usecases.IRegistrationUseCase
 import com.example.letstalk.utilits.AUTH
+import com.example.letstalk.utilits.UID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

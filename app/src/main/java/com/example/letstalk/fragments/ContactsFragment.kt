@@ -1,8 +1,6 @@
 package com.example.letstalk.fragments
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,9 +22,11 @@ class ContactsFragment : Fragment() {
     private var _binding: FragmentContactsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var _adapter: FirebaseRecyclerAdapter<User, ContactsHolder>
+    private var _adapter: FirebaseRecyclerAdapter<User, ContactsHolder>? = null
     private lateinit var refContacts: DatabaseReference
     private lateinit var refUsers: DatabaseReference
+    private lateinit var refUsersListener: ValueEventListener
+    private var mapListeners = HashMap<DatabaseReference, ValueEventListener>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,6 +39,10 @@ class ContactsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initListeners()
+    }
+
+    override fun onResume() {
+        super.onResume()
         initRecycler()
     }
 
@@ -50,51 +54,70 @@ class ContactsFragment : Fragment() {
             .setQuery(refContacts, User::class.java)
             .build()
 
-        _adapter = object: FirebaseRecyclerAdapter<User, ContactsHolder>(options) {
+        _adapter = object : FirebaseRecyclerAdapter<User, ContactsHolder>(options) {
+
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsHolder {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.contact_item, parent, false)
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.contact_item, parent, false)
                 return ContactsHolder(view)
             }
 
             override fun onBindViewHolder(holder: ContactsHolder, position: Int, model: User) {
                 refUsers = REF_DATABASE_ROOT.child(NODE_USERS).child(model.id)
-                refUsers.addValueEventListener(object : ValueEventListener {
+
+                refUsersListener = object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val contact = snapshot.getUserModel()
-                        holder.name.text = contact.name + " " + contact.lastname
+                        holder.name.text = contact.username + " " + contact.userlastname
                         holder.status.text = contact.status
+                        holder.itemView.setOnClickListener {
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .addToBackStack(null)
+                                .replace(
+                                    R.id.fragmentContainerView,
+                                    SingleChatFragment(contact)
+                                ).commit()
+
+                        }
                     }
 
                     override fun onCancelled(error: DatabaseError) {
 
                     }
+                }
 
-                })
+                refUsers.addValueEventListener(refUsersListener)
+                mapListeners[refUsers] = refUsersListener
             }
         }
 
         binding.recyclerListContacts.adapter = _adapter
-        _adapter.startListening()
+        _adapter?.startListening()
     }
 
     private fun initListeners() {
-
-        binding.textSearchFriends.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-                val value = p0.toString()
-                searchUser(value)
-            }
-        })
+        binding.buttonAddFriend.setOnClickListener {
+            hideKeyboard(requireActivity())
+            val value = binding.textSearchFriends.text.toString()
+            searchUser(value)
+        }
     }
 
     class ContactsHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.contact_fullname)
         val status: TextView = view.findViewById(R.id.status)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        _adapter?.stopListening()
+        mapListeners.forEach {
+            it.key.removeEventListener(it.value)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _adapter = null
     }
 }
