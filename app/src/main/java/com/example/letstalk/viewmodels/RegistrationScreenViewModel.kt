@@ -3,24 +3,17 @@ package com.example.letstalk.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.letstalk.entity.RequestResultData
-import com.example.letstalk.entity.UserData
+import com.example.letstalk.entity.UserRegisterData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
-import com.example.letstalk.usecases.ILoginUseCase
 import com.example.letstalk.usecases.IRegistrationUseCase
 import com.example.letstalk.utilits.AUTH
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class RegistrationScreenViewModel @Inject constructor(
-    private val loginUseCase: ILoginUseCase,
     private val regUseCase: IRegistrationUseCase
 ) : ViewModel() {
     var nameError = MutableLiveData<String>()
@@ -67,7 +60,7 @@ class RegistrationScreenViewModel @Inject constructor(
         userData.password = password
     }
 
-    fun getUserData() : UserData {
+    fun getUserData() : UserRegisterData {
         return regUseCase.getUserData()
     }
 

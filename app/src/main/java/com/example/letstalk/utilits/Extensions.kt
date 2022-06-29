@@ -6,8 +6,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 
-fun Fragment.showToast(title: String){
-    Toast.makeText(this.context,title, Toast.LENGTH_SHORT).show()
+fun Fragment.showToast(title: String) {
+    Toast.makeText(this.context, title, Toast.LENGTH_SHORT).show()
 }
 
 fun hideKeyboard(activity: Activity) {

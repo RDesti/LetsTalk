@@ -3,11 +3,10 @@ package com.example.letstalk.activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
 import com.example.letstalk.R
 import com.example.letstalk.databinding.ActivityChatsBinding
 import com.example.letstalk.entity.User
-import com.example.letstalk.enum.EAppStates
+import com.example.letstalk.enum.EAppStatus
 import com.example.letstalk.fragments.ChatFragment
 import com.example.letstalk.utilits.*
 import com.google.firebase.database.DataSnapshot
@@ -29,12 +28,12 @@ class ChatsActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        EAppStates.updateState(EAppStates.ONLINE)
+        EAppStatus.updateState(EAppStatus.ONLINE)
     }
 
     override fun onStop() {
         super.onStop()
-        EAppStates.updateState(EAppStates.OFFLINE)
+        EAppStatus.updateState(EAppStatus.OFFLINE)
     }
 
     private fun initUser() {

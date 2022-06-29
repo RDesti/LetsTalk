@@ -1,6 +1,6 @@
 package com.example.letstalk.entity
 
-class UserData {
+class UserRegisterData {
     var name: String? = null
     var secondName: String? = null
     var password: String? = null

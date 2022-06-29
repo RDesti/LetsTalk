@@ -3,22 +3,15 @@ package com.example.letstalk.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.letstalk.entity.RequestResultData
 import com.example.letstalk.enum.EResultLoginType
 import com.example.letstalk.enum.EValidationType
-import com.example.letstalk.usecases.ILoginUseCase
 import com.example.letstalk.utilits.AUTH
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginScreenViewModel @Inject constructor(
-    private val loginUseCase: ILoginUseCase
-) : ViewModel() {
+class LoginScreenViewModel @Inject constructor() : ViewModel() {
 
     var email = MutableLiveData<String>()
     var password = MutableLiveData<String>()

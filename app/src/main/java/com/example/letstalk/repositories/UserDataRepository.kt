@@ -1,17 +1,17 @@
 package com.example.letstalk.repositories
 
-import com.example.letstalk.entity.UserData
+import com.example.letstalk.entity.UserRegisterData
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UserDataRepository @Inject constructor() : IUserDataRepository{
-    override var userData: UserData = UserData()
+    override var userRegisterData: UserRegisterData = UserRegisterData()
 
     override fun clearData() {
-        userData.email = null
-        userData.name = null
-        userData.secondName = null
-        userData.password = null
+        userRegisterData.email = null
+        userRegisterData.name = null
+        userRegisterData.secondName = null
+        userRegisterData.password = null
     }
 }

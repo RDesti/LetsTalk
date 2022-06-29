@@ -1,8 +1,8 @@
 package com.example.letstalk.usecases
 
-import com.example.letstalk.entity.UserData
+import com.example.letstalk.entity.UserRegisterData
 
 interface IRegistrationUseCase {
-    fun getUserData(): UserData
+    fun getUserData(): UserRegisterData
     fun clearUserData ()
 }

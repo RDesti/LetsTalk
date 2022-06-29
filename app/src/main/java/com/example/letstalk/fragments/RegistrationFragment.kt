@@ -113,16 +113,25 @@ class RegistrationFragment : Fragment() {
                             CHILD_USER_LASTNAME to userData.secondName
                         )
 
-                        REF_DATABASE_ROOT.child(NODE_USERS)
-                            .child(uid)
-                            .updateChildren(dateMap)
-                            .addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    _viewModel.isRegisterSuccses(true)
-                                } else {
-                                    _viewModel.isRegisterSuccses(false)
+                        userData.email?.let { email ->
+                            REF_DATABASE_ROOT.child(NODE_EMAILS)
+                                .child(email.replace('.', '_')).setValue(uid)
+                                .addOnSuccessListener {
+                                    REF_DATABASE_ROOT.child(NODE_USERS)
+                                        .child(uid)
+                                        .updateChildren(dateMap)
+                                        .addOnCompleteListener {
+                                            if (it.isSuccessful) {
+                                                _viewModel.isRegisterSuccses(true)
+                                            } else {
+                                                _viewModel.isRegisterSuccses(false)
+                                            }
+                                        }
                                 }
-                            }
+                                .addOnFailureListener { //todo error message
+                                }
+                        }
+
                     } else {
                         //todo error message
                     }
