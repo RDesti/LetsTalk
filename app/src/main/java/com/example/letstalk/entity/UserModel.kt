@@ -10,7 +10,8 @@ data class UserModel(
     var text: String = "",
     var type: String = "",
     var from: String = "",
-    var timestamp: Any = ""
+    var timestamp: Any = "",
+    var imageUrl: String = "empty"
 ) {
     override fun equals(other: Any?): Boolean {
         return (other as UserModel).id == id

@@ -44,6 +44,18 @@
         android:src="@drawable/ic_baseline_send_24"
         android:padding="5dp"
         android:background="@color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/chat_input_message"/>
+
+    <ImageView
+        android:id="@+id/image_attach_file"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_attach_file"
+        android:padding="5dp"
+        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/chat_input_message"/>

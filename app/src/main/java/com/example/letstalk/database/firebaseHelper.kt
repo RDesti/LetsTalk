@@ -1,5 +1,6 @@
 package com.example.letstalk.utilits
 
+import android.net.Uri
 import com.example.letstalk.entity.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -20,6 +21,8 @@ const val NODE_EMAILS = "emails"
 const val NODE_EMAILS_CONTACTS = "emails_contacts"
 const val NODE_MESSAGES = "messages"
 
+const val FOLDER_MESSAGE_IMAGE = "message_image"
+
 const val CHILD_ID = "id"
 const val CHILD_EMAIL = "email"
 const val CHILD_USER_NAME = "username"
@@ -29,7 +32,7 @@ const val CHILD_TEXT = "text"
 const val CHILD_TYPE = "type"
 const val CHILD_FROM = "from"
 const val CHILD_TIMESTAMP = "timestamp"
-
+const val CHILD_IMAGE_URL = "imageUrl"
 
 fun initFirebase() {
     AUTH = FirebaseAuth.getInstance()
@@ -67,7 +70,7 @@ fun searchUser(email: String) {
 fun DataSnapshot.getUserModel(): UserModel =
     this.getValue(UserModel::class.java) ?: UserModel()
 
-fun sendMessage(message: String, receivingUserId: String, typeText: String, function: () -> Unit) {
+fun sendMessage(message: String, receivingUserId: String, function: () -> Unit) {
     val refDialogUser = "$NODE_MESSAGES/$UID/$receivingUserId"
     val refDialogReceivingUser = "$NODE_MESSAGES/$receivingUserId/$UID"
     val messageKey = REF_DATABASE_ROOT.child(refDialogUser).push().key
@@ -75,7 +78,7 @@ fun sendMessage(message: String, receivingUserId: String, typeText: String, func
     val mapMessage = hashMapOf<String, Any>()
     mapMessage[CHILD_FROM] = UID
     mapMessage[CHILD_ID] = messageKey.toString()
-    mapMessage[CHILD_TYPE] = typeText
+    mapMessage[CHILD_TYPE] = TYPE_TEXT
     mapMessage[CHILD_TEXT] = message
     mapMessage[CHILD_TIMESTAMP] = ServerValue.TIMESTAMP
 
@@ -85,6 +88,44 @@ fun sendMessage(message: String, receivingUserId: String, typeText: String, func
 
     REF_DATABASE_ROOT.updateChildren(mapDialog)
         .addOnSuccessListener { function() }
+        .addOnFailureListener {
+            //todo error message
+        }
+}
+
+inline fun getUrlFromStorage(path: StorageReference, crossinline function: (url: String) -> Unit) {
+    path.downloadUrl
+        .addOnSuccessListener { function(it.toString()) }
+        .addOnFailureListener {
+            //todo error message
+        }
+}
+
+inline fun putImageToStorage(uri: Uri, path: StorageReference, crossinline function: () -> Unit) {
+    path.putFile(uri)
+        .addOnSuccessListener { function() }
+        .addOnFailureListener {
+            //todo error message
+        }
+}
+
+fun sendMessageAsImage(receivingUserId: String, imageUrl: String, messageKey: String) {
+    val refDialogUser = "$NODE_MESSAGES/$UID/$receivingUserId"
+    val refDialogReceivingUser = "$NODE_MESSAGES/$receivingUserId/$UID"
+
+    val mapMessage = hashMapOf<String, Any>()
+    mapMessage[CHILD_FROM] = UID
+    mapMessage[CHILD_ID] = messageKey
+    mapMessage[CHILD_TYPE] = TYPE_IMAGE
+    mapMessage[CHILD_IMAGE_URL] = imageUrl
+    mapMessage[CHILD_TIMESTAMP] = ServerValue.TIMESTAMP
+
+    val mapDialog = hashMapOf<String, Any>()
+    mapDialog["$refDialogUser/$messageKey"] = mapMessage
+    mapDialog["$refDialogReceivingUser/$messageKey"] = mapMessage
+
+    REF_DATABASE_ROOT
+        .updateChildren(mapDialog)
         .addOnFailureListener {
             //todo error message
         }
