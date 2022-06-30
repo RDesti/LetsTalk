@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 import com.example.letstalk.R
 import com.example.letstalk.databinding.ActivityChatsBinding
-import com.example.letstalk.entity.User
+import com.example.letstalk.entity.UserModel
 import com.example.letstalk.enum.EAppStatus
 import com.example.letstalk.fragments.SingleChatFragment
 import com.example.letstalk.utilits.*
@@ -44,7 +44,7 @@ class ChatsActivity : AppCompatActivity() {
         REF_DATABASE_ROOT.child(NODE_USERS).child(UID)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    USER = snapshot.getValue(User::class.java) ?: User()
+                    USER = snapshot.getValue(UserModel::class.java) ?: UserModel()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -72,6 +72,7 @@ class ChatsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         changeToolbar()
+        hideKeyboard(this)
     }
 
     private fun goToLogin() {

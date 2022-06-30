@@ -5,34 +5,37 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AbsListView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.letstalk.R
 import com.example.letstalk.adapters.SingleChatAdapter
 import com.example.letstalk.databinding.FragmentSingleChatBinding
-import com.example.letstalk.entity.User
+import com.example.letstalk.entity.UserModel
 import com.example.letstalk.utilits.*
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
-class SingleChatFragment(contact: User) : Fragment() {
+class SingleChatFragment(contact: UserModel) : Fragment() {
     private var _binding: FragmentSingleChatBinding? = null
     private val binding get() = _binding!!
 
     private val _contact = contact
 
     private lateinit var listenerInfoToolbar: ValueEventListener
-    private lateinit var receivingUser: User
+    private lateinit var receivingUserModel: UserModel
     private lateinit var toolbarInfo: View
     private lateinit var infoContactFullname: TextView
     private lateinit var infoContactStatus: TextView
     private lateinit var refUser: DatabaseReference
     private lateinit var refMessages: DatabaseReference
     private lateinit var adapter: SingleChatAdapter
-    private lateinit var messagesListener: ValueEventListener
-    private var listMessages = emptyList<User>()
+    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var messagesListener: ChildEventListener
+
+    private var countMessages = 10
+    private var isScrolling = false
+    private var isSmoothToPosition = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,6 +51,7 @@ class SingleChatFragment(contact: User) : Fragment() {
         initRecyclerView()
 
         binding.imageSend.setOnClickListener {
+            isSmoothToPosition = true
             val message = binding.chatInputMessage.text.toString()
             if (message.isEmpty()) showToast("Enter your message")
             else sendMessage(message, _contact.id, TYPE_TEXT) {
@@ -58,24 +62,64 @@ class SingleChatFragment(contact: User) : Fragment() {
 
     private fun initRecyclerView() {
         adapter = SingleChatAdapter()
-        val linearLayoutManager = LinearLayoutManager(requireContext())
+        linearLayoutManager = LinearLayoutManager(requireContext())
         linearLayoutManager.stackFromEnd = true
         binding.chatRecyclerView.layoutManager = linearLayoutManager
         refMessages = REF_DATABASE_ROOT.child(NODE_MESSAGES)
             .child(UID).child(_contact.id)
         binding.chatRecyclerView.adapter = adapter
-        messagesListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                listMessages = snapshot.children.map { it.getUserModel() }
-                adapter.setList(listMessages)
-                binding.chatRecyclerView.smoothScrollToPosition(adapter.itemCount)
+        binding.chatRecyclerView.setHasFixedSize(true)
+        binding.chatRecyclerView.isNestedScrollingEnabled = false
+        messagesListener = object : ChildEventListener {
+
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val message = snapshot.getUserModel()
+
+                if (isSmoothToPosition) {
+                    adapter.addItemToBottom(message) {
+                        binding.chatRecyclerView.smoothScrollToPosition(adapter.itemCount)
+                    }
+                } else {
+                    adapter.addItemToTop(message) {
+                        binding.chatSwipeRefreshLayout.isRefreshing = false
+                    }
+                }
             }
 
-            override fun onCancelled(error: DatabaseError) {
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
 
-            }
+            override fun onChildRemoved(snapshot: DataSnapshot) {}
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+            override fun onCancelled(error: DatabaseError) {}
         }
-        refMessages.addValueEventListener(messagesListener)
+        refMessages.limitToLast(countMessages).addChildEventListener(messagesListener)
+
+        binding.chatRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
+                    isScrolling = true
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (isScrolling && dy < 0 && linearLayoutManager.findFirstVisibleItemPosition() <= 3) {
+                    updateData()
+                }
+            }
+        })
+
+        binding.chatSwipeRefreshLayout.setOnRefreshListener { updateData() }
+    }
+
+    private fun updateData() {
+        isSmoothToPosition = false
+        isScrolling = false
+        countMessages += 10
+        refMessages.removeEventListener(messagesListener)
+        refMessages.limitToLast(countMessages).addChildEventListener(messagesListener)
     }
 
     private fun initToolbar() {
@@ -85,7 +129,7 @@ class SingleChatFragment(contact: User) : Fragment() {
         toolbarInfo.visibility = View.VISIBLE
         listenerInfoToolbar = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                receivingUser = snapshot.getUserModel()
+                receivingUserModel = snapshot.getUserModel()
                 infoContactFullname.text = _contact.username + " " + _contact.userlastname
                 infoContactStatus.text = _contact.status
             }

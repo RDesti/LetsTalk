@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.letstalk.R
 import com.example.letstalk.databinding.FragmentContactsBinding
-import com.example.letstalk.entity.User
+import com.example.letstalk.entity.UserModel
 import com.example.letstalk.utilits.*
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
@@ -22,7 +22,7 @@ class ContactsFragment : Fragment() {
     private var _binding: FragmentContactsBinding? = null
     private val binding get() = _binding!!
 
-    private var _adapter: FirebaseRecyclerAdapter<User, ContactsHolder>? = null
+    private var _adapter: FirebaseRecyclerAdapter<UserModel, ContactsHolder>? = null
     private lateinit var refContacts: DatabaseReference
     private lateinit var refUsers: DatabaseReference
     private lateinit var refUsersListener: ValueEventListener
@@ -50,11 +50,11 @@ class ContactsFragment : Fragment() {
         refContacts = REF_DATABASE_ROOT.child(NODE_EMAILS_CONTACTS)
             .child(UID)
 
-        val options = FirebaseRecyclerOptions.Builder<User>()
-            .setQuery(refContacts, User::class.java)
+        val options = FirebaseRecyclerOptions.Builder<UserModel>()
+            .setQuery(refContacts, UserModel::class.java)
             .build()
 
-        _adapter = object : FirebaseRecyclerAdapter<User, ContactsHolder>(options) {
+        _adapter = object : FirebaseRecyclerAdapter<UserModel, ContactsHolder>(options) {
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactsHolder {
                 val view = LayoutInflater.from(parent.context)
@@ -62,7 +62,7 @@ class ContactsFragment : Fragment() {
                 return ContactsHolder(view)
             }
 
-            override fun onBindViewHolder(holder: ContactsHolder, position: Int, model: User) {
+            override fun onBindViewHolder(holder: ContactsHolder, position: Int, model: UserModel) {
                 refUsers = REF_DATABASE_ROOT.child(NODE_USERS).child(model.id)
 
                 refUsersListener = object : ValueEventListener {

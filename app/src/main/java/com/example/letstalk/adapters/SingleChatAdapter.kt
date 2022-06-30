@@ -7,12 +7,12 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.letstalk.R
-import com.example.letstalk.entity.User
+import com.example.letstalk.entity.UserModel
 import com.example.letstalk.utilits.UID
 import com.example.letstalk.utilits.asTime
 
 class SingleChatAdapter : RecyclerView.Adapter<SingleChatAdapter.SingleChatViewHolder>() {
-    private var listMessagesCache = emptyList<User>()
+    private var listMessagesCache = mutableListOf<UserModel>()
 
     class SingleChatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var blockUserMessage: ConstraintLayout? = null
@@ -45,19 +45,39 @@ class SingleChatAdapter : RecyclerView.Adapter<SingleChatAdapter.SingleChatViewH
             holder.blockUserMessage?.visibility = View.VISIBLE
             holder.blockReceivedMessage?.visibility = View.GONE
             holder.chatUserMessage?.text = listMessagesCache[position].text
-            holder.chatUserMessageTime?.text = listMessagesCache[position].timestamp.toString().asTime()
+            holder.chatUserMessageTime?.text =
+                listMessagesCache[position].timestamp.toString().asTime()
         } else {
             holder.blockUserMessage?.visibility = View.GONE
             holder.blockReceivedMessage?.visibility = View.VISIBLE
             holder.chatReceivedMessage?.text = listMessagesCache[position].text
-            holder.chatReceivedMessageTime?.text = listMessagesCache[position].timestamp.toString().asTime()
+            holder.chatReceivedMessageTime?.text =
+                listMessagesCache[position].timestamp.toString().asTime()
         }
     }
 
     override fun getItemCount(): Int = listMessagesCache.size
 
-    fun setList(list: List<User>) {
-        listMessagesCache = list
-        notifyDataSetChanged()
+    fun addItemToBottom(
+        userModel: UserModel,
+        onSuccess: () -> Unit
+    ) {
+        if (!listMessagesCache.contains(userModel)) {
+            listMessagesCache.add(userModel)
+            notifyItemInserted(listMessagesCache.size)
+        }
+        onSuccess()
+    }
+
+    fun addItemToTop(
+        userModel: UserModel,
+        onSuccess: () -> Unit
+    ) {
+        if (!listMessagesCache.contains(userModel)) {
+            listMessagesCache.add(userModel)
+            listMessagesCache.sortBy { it.timestamp.toString() }
+            notifyItemInserted(0)
+        }
+        onSuccess()
     }
 }
