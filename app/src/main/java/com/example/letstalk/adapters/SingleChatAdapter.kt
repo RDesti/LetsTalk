@@ -1,124 +1,85 @@
 package com.example.letstalk.adapters
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.example.letstalk.R
-import com.example.letstalk.entity.UserModel
+import com.example.letstalk.adapters.viewholders.HolderFactory
+import com.example.letstalk.adapters.viewholders.ImageMessageHolder
+import com.example.letstalk.adapters.viewholders.TextMessageViewHolder
+import com.example.letstalk.customview.IMessageView
 import com.example.letstalk.utilits.*
 
-class SingleChatAdapter : RecyclerView.Adapter<SingleChatAdapter.SingleChatViewHolder>() {
-    private var listMessagesCache = mutableListOf<UserModel>()
+class SingleChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var listMessagesCache = mutableListOf<IMessageView>()
 
-    class SingleChatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // TEXT_MESSAGE
-        var blockUserMessage: ConstraintLayout? = null
-        var chatUserMessage: TextView? = null
-        var chatUserMessageTime: TextView? = null
-        var blockReceivedMessage: ConstraintLayout? = null
-        var chatReceivedMessage: TextView? = null
-        var chatReceivedMessageTime: TextView? = null
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return HolderFactory.getHolder(parent, viewType)
+    }
 
-        //IMAGE_MESSAGE
-        var blockUserImageMessage: ConstraintLayout? = null
-        var chatUserImageMessage: ImageView? = null
-        var chatUserImageMessageTime: TextView? = null
-        var blockReceivedImageMessage: ConstraintLayout? = null
-        var chatReceivedImageMessage: ImageView? = null
-        var chatReceivedImageMessageTime: TextView? = null
+    override fun getItemViewType(position: Int): Int {
+        return listMessagesCache[position].getTypeView()
+    }
 
-        init {
-            blockUserMessage = itemView.findViewById(R.id.block_user_message)
-            chatUserMessage = itemView.findViewById(R.id.chat_user_message)
-            chatUserMessageTime = itemView.findViewById(R.id.chat_user_message_time)
-            blockReceivedMessage = itemView.findViewById(R.id.block_receiver_message)
-            chatReceivedMessage = itemView.findViewById(R.id.chat_receiver_message)
-            chatReceivedMessageTime = itemView.findViewById(R.id.chat_receiver_message_time)
-
-            blockUserImageMessage = itemView.findViewById(R.id.block_user_image_message)
-            chatUserImageMessage = itemView.findViewById(R.id.chat_user_image)
-            chatUserImageMessageTime = itemView.findViewById(R.id.chat_user_image_message_time)
-            blockReceivedImageMessage = itemView.findViewById(R.id.block_receiver_image_message)
-            chatReceivedImageMessage = itemView.findViewById(R.id.chat_receiver_image)
-            chatReceivedImageMessageTime =
-                itemView.findViewById(R.id.chat_receiver_image_message_time)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is TextMessageViewHolder -> drawMessageText(holder, position)
+            is ImageMessageHolder -> drawMessageImage(holder, position)
+            else -> {}
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingleChatViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.message_item, parent, false)
-        return SingleChatViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: SingleChatViewHolder, position: Int) {
-        when (listMessagesCache[position].type) {
-            TYPE_TEXT -> drawMessageText(holder, position)
-            TYPE_IMAGE -> drawMessageImage(holder, position)
-        }
-    }
-
-    private fun drawMessageText(holder: SingleChatViewHolder, position: Int) {
-        holder.blockReceivedImageMessage?.visibility = View.GONE
-        holder.blockUserImageMessage?.visibility = View.GONE
-
+    private fun drawMessageText(holder: TextMessageViewHolder, position: Int) {
         if (listMessagesCache[position].from == UID) {
             holder.blockUserMessage?.visibility = View.VISIBLE
             holder.blockReceivedMessage?.visibility = View.GONE
             holder.chatUserMessage?.text = listMessagesCache[position].text
             holder.chatUserMessageTime?.text =
-                listMessagesCache[position].timestamp.toString().asTime()
+                listMessagesCache[position].timestamp.asTime()
         } else {
             holder.blockUserMessage?.visibility = View.GONE
             holder.blockReceivedMessage?.visibility = View.VISIBLE
             holder.chatReceivedMessage?.text = listMessagesCache[position].text
             holder.chatReceivedMessageTime?.text =
-                listMessagesCache[position].timestamp.toString().asTime()
+                listMessagesCache[position].timestamp.asTime()
         }
     }
 
-    private fun drawMessageImage(holder: SingleChatViewHolder, position: Int) {
-        holder.blockUserMessage?.visibility = View.GONE
-        holder.blockReceivedMessage?.visibility = View.GONE
+    private fun drawMessageImage(holder: ImageMessageHolder, position: Int) {
 
         if (listMessagesCache[position].from == UID) {
             holder.blockReceivedImageMessage?.visibility = View.GONE
             holder.blockUserImageMessage?.visibility = View.VISIBLE
-            holder.chatUserImageMessage?.downloadAndSetImage(listMessagesCache[position].imageUrl)
+            holder.chatUserImageMessage?.downloadAndSetImage(listMessagesCache[position].fileUrl)
             holder.chatUserImageMessageTime?.text =
-                listMessagesCache[position].timestamp.toString().asTime()
+                listMessagesCache[position].timestamp.asTime()
         } else {
             holder.blockReceivedImageMessage?.visibility = View.VISIBLE
             holder.blockUserImageMessage?.visibility = View.GONE
-            holder.chatReceivedImageMessage?.downloadAndSetImage(listMessagesCache[position].imageUrl)
+            holder.chatReceivedImageMessage?.downloadAndSetImage(listMessagesCache[position].fileUrl)
             holder.chatReceivedImageMessageTime?.text =
-                listMessagesCache[position].timestamp.toString().asTime()
+                listMessagesCache[position].timestamp.asTime()
         }
     }
 
     override fun getItemCount(): Int = listMessagesCache.size
 
     fun addItemToBottom(
-        userModel: UserModel,
+        item: IMessageView,
         onSuccess: () -> Unit
     ) {
-        if (!listMessagesCache.contains(userModel)) {
-            listMessagesCache.add(userModel)
+        if (!listMessagesCache.contains(item)) {
+            listMessagesCache.add(item)
             notifyItemInserted(listMessagesCache.size)
         }
         onSuccess()
     }
 
     fun addItemToTop(
-        userModel: UserModel,
+        item: IMessageView,
         onSuccess: () -> Unit
     ) {
-        if (!listMessagesCache.contains(userModel)) {
-            listMessagesCache.add(userModel)
+        if (!listMessagesCache.contains(item)) {
+            listMessagesCache.add(item)
             listMessagesCache.sortBy { it.timestamp.toString() }
             notifyItemInserted(0)
         }

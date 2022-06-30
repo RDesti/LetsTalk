@@ -9,12 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.TextView
+import android.widget.ViewSwitcher
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.letstalk.R
 import com.example.letstalk.adapters.SingleChatAdapter
+import com.example.letstalk.customview.CustomViewFactory
 import com.example.letstalk.databinding.FragmentSingleChatBinding
 import com.example.letstalk.entity.UserModel
 import com.example.letstalk.utilits.*
@@ -130,11 +132,11 @@ class SingleChatFragment(contact: UserModel) : Fragment() {
                 val message = snapshot.getUserModel()
 
                 if (isSmoothToPosition) {
-                    adapter.addItemToBottom(message) {
+                    adapter.addItemToBottom(CustomViewFactory.getView(message)) {
                         binding.chatRecyclerView.smoothScrollToPosition(adapter.itemCount)
                     }
                 } else {
-                    adapter.addItemToTop(message) {
+                    adapter.addItemToTop(CustomViewFactory.getView(message)) {
                         binding.chatSwipeRefreshLayout.isRefreshing = false
                     }
                 }
