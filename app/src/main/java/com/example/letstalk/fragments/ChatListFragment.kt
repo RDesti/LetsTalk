@@ -33,4 +33,9 @@ class ChatListFragment : Fragment() {
             this.findNavController().navigate(R.id.action_chatListFragment_to_contactsFragment)
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

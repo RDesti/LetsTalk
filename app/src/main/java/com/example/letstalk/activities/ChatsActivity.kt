@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.letstalk.R
 import com.example.letstalk.databinding.ActivityChatsBinding
 import com.example.letstalk.entity.User

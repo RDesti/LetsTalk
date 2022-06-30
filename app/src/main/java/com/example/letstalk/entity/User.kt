@@ -5,5 +5,10 @@ data class User(
     val username: String = "",
     val userlastname: String = "",
     val email: String = "",
-    var status: String = ""
+    var status: String = "",
+
+    var text: String = "",
+    var type: String = "",
+    var from: String = "",
+    var timestamp: Any = ""
 )

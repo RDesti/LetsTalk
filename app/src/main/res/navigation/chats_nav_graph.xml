@@ -21,7 +21,7 @@
         android:id="@+id/chatFragment"
         android:name="com.example.letstalk.fragments.SingleChatFragment"
         android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" >
+        tools:layout="@layout/fragment_single_chat" >
         <action
             android:id="@+id/action_chatFragment_to_chatListFragment"
             app:destination="@id/chatListFragment" />

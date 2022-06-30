@@ -152,6 +152,7 @@
                         android:textColorHint="@color/teal_700"
                         android:textSize="14sp"
                         android:typeface="normal"
+                        android:inputType="textPassword"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/password_textView" />

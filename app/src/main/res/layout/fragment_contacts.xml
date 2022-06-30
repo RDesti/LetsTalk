@@ -14,7 +14,7 @@
         android:layout_marginTop="10dp"
         style="@style/editText_registration"
         android:hint="Search friends"
-        android:inputType="textPersonName"
+        android:inputType="textEmailAddress"
         android:letterSpacing="0.05"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

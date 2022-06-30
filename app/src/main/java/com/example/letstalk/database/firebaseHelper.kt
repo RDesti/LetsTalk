@@ -12,15 +12,24 @@ lateinit var REF_DATABASE_ROOT: DatabaseReference
 lateinit var REF_STORAGE_ROOT: StorageReference
 lateinit var USER: User
 
+const val TYPE_TEXT = "text"
+const val TYPE_IMAGE = "image"
+
 const val NODE_USERS = "users"
 const val NODE_EMAILS = "emails"
 const val NODE_EMAILS_CONTACTS = "emails_contacts"
+const val NODE_MESSAGES = "messages"
 
 const val CHILD_ID = "id"
 const val CHILD_EMAIL = "email"
 const val CHILD_USER_NAME = "username"
 const val CHILD_USER_LASTNAME = "userlastname"
 const val CHILD_STATUS = "status"
+const val CHILD_TEXT = "text"
+const val CHILD_TYPE = "type"
+const val CHILD_FROM = "from"
+const val CHILD_TIMESTAMP = "timestamp"
+
 
 fun initFirebase() {
     AUTH = FirebaseAuth.getInstance()
@@ -57,3 +66,25 @@ fun searchUser(email: String) {
 
 fun DataSnapshot.getUserModel(): User =
     this.getValue(User::class.java) ?: User()
+
+fun sendMessage(message: String, receivingUserId: String, typeText: String, function: () -> Unit) {
+    val refDialogUser = "$NODE_MESSAGES/$UID/$receivingUserId"
+    val refDialogReceivingUser = "$NODE_MESSAGES/$receivingUserId/$UID"
+    val messageKey = REF_DATABASE_ROOT.child(refDialogUser).push().key
+
+    val mapMessage = hashMapOf<String, Any>()
+    mapMessage[CHILD_FROM] = UID
+    mapMessage[CHILD_TYPE] = typeText
+    mapMessage[CHILD_TEXT] = message
+    mapMessage[CHILD_TIMESTAMP] = ServerValue.TIMESTAMP
+
+    val mapDialog = hashMapOf<String, Any>()
+    mapDialog["$refDialogUser/$messageKey"] = mapMessage
+    mapDialog["$refDialogReceivingUser/$messageKey"] = mapMessage
+
+    REF_DATABASE_ROOT.updateChildren(mapDialog)
+        .addOnSuccessListener { function() }
+        .addOnFailureListener {
+            //todo error message
+        }
+}
